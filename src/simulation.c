@@ -1,18 +1,19 @@
 #include <unistd.h>
 #include <string.h>
+#include <sys/time.h>
 #include "sequential.c"
 #include "openMP.c"
+#include <omp.h>
 
 void usage();
 
 int main(int argc, const char **argv) {
 
-	int option = -1;
 	int numberOfMatrices = 2;
 	int dimensionOfMatrices = 2;
-	char method[1];
+	//char method[1];
 
-	if(argc != 4){
+	if(argc != 3){
 		printf("%d\n", argc);
 		usage();
 		return 0;
@@ -20,9 +21,22 @@ int main(int argc, const char **argv) {
 
 	numberOfMatrices = atoi(argv[1]);
 	dimensionOfMatrices = atoi(argv[2]);
-	strncpy(method, argv[3], 1);
+	omp_set_num_threads(8);
+	//strncpy(method, argv[3], 1);
+
+	// a quick hack
+	typedef unsigned long long usecs;
+	usecs mytime()
+	{
+	  struct timeval now;
+	  gettimeofday(&now,NULL);
+	  return (usecs)now.tv_usec+(usecs)now.tv_sec*1000000L;
+	}
+	usecs start, stop;
+	double sequentialTime, openMPTime;
 
 	unsigned ***matrices = malloc(numberOfMatrices * sizeof(**matrices));
+	#pragma omp parallel for
 	for(int matrix = 0; matrix < numberOfMatrices; matrix++){
 		matrices[matrix] = randomMatrix(dimensionOfMatrices);
 	}
@@ -32,11 +46,19 @@ int main(int argc, const char **argv) {
 
 	printf("Starting simulation.\n");
 
+	start = mytime();
 	unsigned **resultMatrixSequential = sequentialSimulation(numberOfMatrices, dimensionOfMatrices, matricesCopy1);
-	printMatrix(dimensionOfMatrices, resultMatrixSequential);
+	stop = mytime();
+	sequentialTime = ((double)(stop-start))/(double)1000000;
+	printf("Sequential time %fs\n",sequentialTime);
+
+	start = mytime();
 	unsigned **resultMatrixOpenMP = openMPSimulation(numberOfMatrices, dimensionOfMatrices, matricesCopy2);
-	printMatrix(dimensionOfMatrices, resultMatrixOpenMP);
-	printf("equals: %d\n", equals(dimensionOfMatrices, resultMatrixSequential, resultMatrixOpenMP));
+	stop = mytime();
+	openMPTime = ((double)(stop-start))/(double)1000000;
+	printf("OpenMP time %fs\n",openMPTime);
+
+	printf("OpenMP: equals: %d; speedup: %f\n", equals(dimensionOfMatrices, resultMatrixSequential, resultMatrixOpenMP), sequentialTime/openMPTime);
 
 	return 0;
 }

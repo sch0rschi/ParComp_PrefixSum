@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <omp.h>
 
 void multiplyResultInA(unsigned dimension, unsigned** matrixA, unsigned** matrixB) {
 	unsigned *actualRow = malloc( dimension * sizeof(*actualRow) );
@@ -37,8 +38,10 @@ unsigned** randomMatrix(unsigned dimension){
 	/* Intializes random number generator */
 	srand((unsigned) time(&t));
 	unsigned **matrix = malloc(dimension * sizeof(unsigned*));
+	#pragma omp parallel for
 	for(unsigned row = 0; row < dimension; row++){
 		matrix[row] = malloc(dimension * sizeof(unsigned));
+		#pragma omp parallel for
 		for (unsigned column = 0; column < dimension; column++){
 			matrix[row][column] = (unsigned) rand();
 		}
@@ -68,8 +71,10 @@ int equals(unsigned dimension, unsigned** matrixA, unsigned** matrixB){
 
 unsigned **copyMatrix(unsigned dimension, unsigned **matrix){
 	unsigned **newMatrix = malloc(dimension * sizeof(unsigned*));
+	#pragma omp parallel for
 	for(int row = 0; row < dimension; row++){
 		newMatrix[row] = malloc(dimension * sizeof(unsigned));
+		#pragma omp parallel for
 		for(int column = 0; column < dimension; column++){
 			newMatrix[row][column] = matrix[row][column];
 		}
@@ -79,6 +84,7 @@ unsigned **copyMatrix(unsigned dimension, unsigned **matrix){
 
 unsigned ***copyMatrices(unsigned numberOfMatrices, unsigned dimension, unsigned ***matrices){
 	unsigned ***newMatrices = malloc(numberOfMatrices * sizeof(**newMatrices));
+	#pragma omp parallel for
 	for(int matrix = 0; matrix < numberOfMatrices; matrix++){
 		newMatrices[matrix] = copyMatrix(dimension, matrices[matrix]);
 	}

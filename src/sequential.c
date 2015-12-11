@@ -2,12 +2,13 @@
 
 #include "matrix.c"
 
-int main(int argc, const char* argv[]) {
-	unsigned **matrixA = randomMatrix(2);
-    unsigned **matrixB = randomMatrix(2);
-
-    multiplyResultInA( 2, matrixA, matrixB );
-
-    printf("%u\t%u\n%u\t%u\n", matrixA[0][0], matrixA[0][1], matrixA[1][0], matrixA[1][1]);
-    return 0;
+void sequentialSimulation(unsigned numberOfMatrices, unsigned dimensionOfMatrices) {
+	unsigned ***matrices = malloc(numberOfMatrices * sizeof(**matrices));
+	for(int matrix = 0; matrix < numberOfMatrices; matrix++){
+		matrices[matrix] = randomMatrix(dimensionOfMatrices);
+	}
+	for(int matrix = 1; matrix < numberOfMatrices; matrix++){
+		multiplyResultInA(dimensionOfMatrices, matrices[0], matrices[matrix]);
+	}
+	printMatrix(dimensionOfMatrices, matrices[0]);
 }

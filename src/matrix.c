@@ -30,7 +30,9 @@ void multiplyResultInA(unsigned dimension, unsigned** matrixA, unsigned** matrix
 }
 
 unsigned** randomMatrix(unsigned dimension){
-	srand (time(NULL));
+	time_t t;
+	/* Intializes random number generator */
+	srand((unsigned) time(&t));
 	unsigned **matrix = malloc(dimension * sizeof(unsigned*));
 	for(unsigned row = 0; row < dimension; row++){
 		matrix[row] = malloc(dimension * sizeof(unsigned));
@@ -39,4 +41,24 @@ unsigned** randomMatrix(unsigned dimension){
 		}
 	}
 	return matrix;
+}
+
+void printMatrix(unsigned dimension, unsigned** matrix){
+	for(int row = 0; row < dimension; row++){
+		for(int column = 0; column < dimension; column++){
+			printf("%u\t", matrix[row][column]);
+		}
+		printf("\n");
+	}
+}
+
+int equals(unsigned dimension, unsigned** matrixA, unsigned** matrixB){
+	for(int row = 0; row < dimension; row++){
+		for(int column = 0; column < dimension; column++){
+			if(matrixA[row][column] != matrixB[row][column]){
+				return 0;
+			}
+		}
+	}
+	return 1;
 }

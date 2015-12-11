@@ -1,14 +1,19 @@
 #include <stdio.h>
 
-#include "matrix.c"
+#include "matrix.h"
 
-void sequentialSimulation(unsigned numberOfMatrices, unsigned dimensionOfMatrices) {
-	unsigned ***matrices = malloc(numberOfMatrices * sizeof(**matrices));
-	for(int matrix = 0; matrix < numberOfMatrices; matrix++){
-		matrices[matrix] = randomMatrix(dimensionOfMatrices);
-	}
+unsigned **sequentialSimulation(unsigned numberOfMatrices, unsigned dimensionOfMatrices, unsigned ***matrices) {
+
+	time_t start;
+	time_t end;
+	time (&start);
+
 	for(int matrix = 1; matrix < numberOfMatrices; matrix++){
 		multiplyResultInA(dimensionOfMatrices, matrices[0], matrices[matrix]);
 	}
-	printMatrix(dimensionOfMatrices, matrices[0]);
+
+	time (&end);
+	printf("Sequential took: %d.\n", (end-start));
+
+	return matrices[0];
 }

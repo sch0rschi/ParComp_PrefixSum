@@ -1,3 +1,6 @@
+#ifndef MATRIX_H
+#define MATRIX_H
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -62,3 +65,23 @@ int equals(unsigned dimension, unsigned** matrixA, unsigned** matrixB){
 	}
 	return 1;
 }
+
+unsigned **copyMatrix(unsigned dimension, unsigned **matrix){
+	unsigned **newMatrix = malloc(dimension * sizeof(unsigned*));
+	for(int row = 0; row < dimension; row++){
+		newMatrix[row] = malloc(dimension * sizeof(unsigned));
+		for(int column = 0; column < dimension; column++){
+			newMatrix[row][column] = matrix[row][column];
+		}
+	}
+	return newMatrix;
+}
+
+unsigned ***copyMatrices(unsigned numberOfMatrices, unsigned dimension, unsigned ***matrices){
+	unsigned ***newMatrices = malloc(numberOfMatrices * sizeof(**newMatrices));
+	for(int matrix = 0; matrix < numberOfMatrices; matrix++){
+		newMatrices[matrix] = copyMatrix(dimension, matrices[matrix]);
+	}
+	return newMatrices;
+}
+#endif

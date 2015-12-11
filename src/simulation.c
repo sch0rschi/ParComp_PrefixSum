@@ -1,36 +1,46 @@
 #include <unistd.h>
+#include <string.h>
 #include "sequential.c"
+#include "openMP.c"
 
-int main(int argc, const char* argv[]) {
+void usage();
+
+int main(int argc, const char **argv) {
 
 	int option = -1;
 	int numberOfMatrices = 2;
 	int dimensionOfMatrices = 2;
-	char method = 's';
+	char method[1];
 
-	/*while ((option = getopt (argc, argv, "n:d:m:")) != -1){
-		switch (option){
-			case 'n':
-			numberOfMatrices = (unsigned)atoi(optarg);
-			break;
-			case 'd':
-			dimensionOfMatrices = (unsigned)atoi(optarg);
-			break;
-			case 'm':
-			method = strdup(optarg);
-			break;
-			default:
-			usage();
-			return 0;
-			break;
-		}
-	}*/
+	if(argc != 4){
+		printf("%d\n", argc);
+		usage();
+		return 0;
+	}
 
-	sequentialSimulation(20, 20);
+	numberOfMatrices = atoi(argv[1]);
+	dimensionOfMatrices = atoi(argv[2]);
+	strncpy(method, argv[3], 1);
+
+	unsigned ***matrices = malloc(numberOfMatrices * sizeof(**matrices));
+	for(int matrix = 0; matrix < numberOfMatrices; matrix++){
+		matrices[matrix] = randomMatrix(dimensionOfMatrices);
+	}
+
+	unsigned*** matricesCopy1 = copyMatrices(numberOfMatrices, dimensionOfMatrices, matrices);
+	unsigned*** matricesCopy2 = copyMatrices(numberOfMatrices, dimensionOfMatrices, matrices);
+
+	printf("Starting simulation.\n");
+
+	unsigned **resultMatrixSequential = sequentialSimulation(numberOfMatrices, dimensionOfMatrices, matricesCopy1);
+	printMatrix(dimensionOfMatrices, resultMatrixSequential);
+	unsigned **resultMatrixOpenMP = openMPSimulation(numberOfMatrices, dimensionOfMatrices, matricesCopy2);
+	printMatrix(dimensionOfMatrices, resultMatrixOpenMP);
+	printf("equals: %d\n", equals(dimensionOfMatrices, resultMatrixSequential, resultMatrixOpenMP));
 
 	return 0;
 }
 
 void usage(){
-	printf("Options: n for number of Matrices, d for dimension of Matrices, m for method.");
+	printf("simulation numberOfMatrices dimensionofMatrices method\n");
 }

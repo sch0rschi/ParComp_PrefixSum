@@ -31,6 +31,7 @@ void multiplyResultInA(unsigned dimension, unsigned** matrixA, unsigned** matrix
             sum = 0;
         }
     } /* end of calculating the result */
+    free(actualRow);
 }
 
 unsigned** randomMatrix(unsigned dimension){

@@ -51,15 +51,20 @@ int main(int argc, const char **argv) {
 	stop = mytime();
 	sequentialTime = ((double)(stop-start))/(double)1000000;
 	printf("Sequential time %fs\n",sequentialTime);
+	free(matricesCopy1);
 
 	start = mytime();
 	unsigned **resultMatrixOpenMP = openMPSimulation(numberOfMatrices, dimensionOfMatrices, matricesCopy2);
 	stop = mytime();
 	openMPTime = ((double)(stop-start))/(double)1000000;
 	printf("OpenMP time %fs\n",openMPTime);
+	free(matricesCopy2);
 
 	printf("OpenMP: equals: %d; speedup: %f\n", equals(dimensionOfMatrices, resultMatrixSequential, resultMatrixOpenMP), sequentialTime/openMPTime);
 
+	free(resultMatrixSequential);
+	free(resultMatrixOpenMP);
+	free(matrices);
 	return 0;
 }
 

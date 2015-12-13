@@ -1,9 +1,10 @@
 #include <unistd.h>
 #include <string.h>
 #include <sys/time.h>
+#include <omp.h>
 #include "sequential.c"
 #include "openMP.c"
-#include <omp.h>
+#include "cilk.c"
 
 void usage();
 
@@ -33,8 +34,9 @@ int main(int argc, const char **argv) {
 	  return (usecs)now.tv_usec+(usecs)now.tv_sec*1000000L;
 	}
 	usecs start, stop;
-	double sequentialTime, openMPTime;
+	double generateTime, sequentialTime, openMPTime, cilkTime;
 
+	start = mytime();
 	unsigned ***matrices = malloc(numberOfMatrices * sizeof(**matrices));
 	#pragma omp parallel for
 	for(int matrix = 0; matrix < numberOfMatrices; matrix++){
@@ -43,8 +45,11 @@ int main(int argc, const char **argv) {
 
 	unsigned*** matricesCopy1 = copyMatrices(numberOfMatrices, dimensionOfMatrices, matrices);
 	unsigned*** matricesCopy2 = copyMatrices(numberOfMatrices, dimensionOfMatrices, matrices);
+	unsigned*** matricesCopy3 = copyMatrices(numberOfMatrices, dimensionOfMatrices, matrices);
 
-	printf("Starting simulation.\n");
+	stop = mytime();
+	generateTime = ((double)(stop-start))/(double)1000000;
+	printf("Starting simulation took %f to generate matrices.\n", generateTime);
 
 	start = mytime();
 	unsigned **resultMatrixSequential = sequentialSimulation(numberOfMatrices, dimensionOfMatrices, matricesCopy1);
@@ -60,7 +65,15 @@ int main(int argc, const char **argv) {
 	printf("OpenMP time %fs\n",openMPTime);
 	free(matricesCopy2);
 
+	start = mytime();
+	unsigned **resultMatrixCilk = cilkSimulation(numberOfMatrices, dimensionOfMatrices, matricesCopy3);
+	stop = mytime();
+	cilkTime = ((double)(stop-start))/(double)1000000;
+	printf("Cilk time %fs\n",openMPTime);
+	free(matricesCopy3);
+
 	printf("OpenMP: equals: %d; speedup: %f\n", equals(dimensionOfMatrices, resultMatrixSequential, resultMatrixOpenMP), sequentialTime/openMPTime);
+	printf("Cilk: equals: %d; speedup: %f\n", equals(dimensionOfMatrices, resultMatrixSequential, resultMatrixCilk), sequentialTime/cilkTime);
 
 	free(resultMatrixSequential);
 	free(resultMatrixOpenMP);
